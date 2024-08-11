@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS - Gerenciamento de Etiquetas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>WMS - Gerenciamento de Etiquetas</h1>
+    
+    <!-- Formulário para adicionar etiqueta -->
+    <form action="{{ url_for('adicionar') }}" method="POST">
+        <h2>Adicionar Etiqueta</h2>
+        <input type="text" name="id_etiqueta" placeholder="ID da Etiqueta" required>
+        <select name="area_inicial" required>
+            <option value="" disabled selected>Selecione a Área</option>
+            {% for area in areas %}
+                <option value="{{ area }}">{{ area }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Adicionar</button>
+    </form>
+
+    <!-- Formulário para atualizar a localização da etiqueta -->
+    <form action="{{ url_for('atualizar') }}" method="POST">
+        <h2>Atualizar Localização da Etiqueta</h2>
+        <input type="text" name="id_etiqueta" placeholder="ID da Etiqueta" required>
+        <select name="nova_area" required>
+            <option value="" disabled selected>Selecione a Nova Área</option>
+            {% for area in areas %}
+                <option value="{{ area }}">{{ area }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Atualizar</button>
+    </form>
+
+    <!-- Formulário de busca de etiqueta -->
+    <form action="{{ url_for('buscar') }}" method="POST">
+        <h2>Buscar Etiqueta</h2>
+        <input type="text" name="id_etiqueta_busca" placeholder="ID da Etiqueta" required>
+        <button type="submit">Buscar</button>
+    </form>
+
+    <!-- Exibir resultado da busca -->
+    {% if etiqueta %}
+    <h2>Resultado da Busca</h2>
+    <p>ID da Etiqueta: <strong>{{ etiqueta }}</strong></p>
+    <p>Área: <strong>{{ area }}</strong></p>
+    <p>Última atualização: <strong>{{ data_hora }}</strong></p>
+    {% endif %}
+
+    <!-- Exibir mensagens flash -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>
