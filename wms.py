@@ -1,5 +1,7 @@
 import pymysql
 from pymysql import OperationalError
+from datetime import datetime
+import pytz
 
 # Configurações da conexão com o banco de dados
 def conectar_banco():
@@ -31,7 +33,7 @@ def criar_tabela():
                 CREATE TABLE IF NOT EXISTS etiquetas (
                     id_etiqueta VARCHAR(50) PRIMARY KEY,
                     area VARCHAR(100) NOT NULL,
-                    data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                    data_hora TIMESTAMP NOT NULL
                 )
             """)
             connection.commit()
@@ -39,7 +41,13 @@ def criar_tabela():
         except OperationalError as e:
             print(f"Erro ao criar a tabela: {e}")
         finally:
+            cursor.close()
             connection.close()
+
+# Função para obter o horário atual de São Paulo
+def horario_sao_paulo():
+    timezone = pytz.timezone('America/Sao_Paulo')
+    return datetime.now(timezone)
 
 # Função para adicionar uma nova etiqueta
 def adicionar_etiqueta(id_etiqueta, area_inicial):
@@ -47,12 +55,14 @@ def adicionar_etiqueta(id_etiqueta, area_inicial):
     if connection:
         try:
             cursor = connection.cursor()
-            cursor.execute("INSERT INTO etiquetas (id_etiqueta, area) VALUES (%s, %s)", 
-                           (id_etiqueta, area_inicial))
+            data_hora_atual = horario_sao_paulo()
+            cursor.execute("INSERT INTO etiquetas (id_etiqueta, area, data_hora) VALUES (%s, %s, %s)", 
+                           (id_etiqueta, area_inicial, data_hora_atual))
             connection.commit()
         except OperationalError as e:
             raise ValueError(f"Erro ao adicionar etiqueta: {e}")
         finally:
+            cursor.close()
             connection.close()
 
 # Função para atualizar a localização de uma etiqueta
@@ -61,12 +71,14 @@ def atualizar_localizacao(id_etiqueta, nova_area):
     if connection:
         try:
             cursor = connection.cursor()
-            cursor.execute("UPDATE etiquetas SET area = %s WHERE id_etiqueta = %s", 
-                           (nova_area, id_etiqueta))
+            data_hora_atual = horario_sao_paulo()
+            cursor.execute("UPDATE etiquetas SET area = %s, data_hora = %s WHERE id_etiqueta = %s", 
+                           (nova_area, data_hora_atual, id_etiqueta))
             connection.commit()
         except OperationalError as e:
             raise ValueError(f"Erro ao atualizar localização: {e}")
         finally:
+            cursor.close()
             connection.close()
 
 # Função para consultar a localização de uma etiqueta
@@ -85,6 +97,7 @@ def consultar_localizacao(id_etiqueta):
         except OperationalError as e:
             raise ValueError(f"Erro ao consultar localização: {e}")
         finally:
+            cursor.close()
             connection.close()
 
 # Inicializar banco de dados ao iniciar o sistema
