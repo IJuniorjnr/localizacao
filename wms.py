@@ -35,7 +35,8 @@ def criar_tabela():
                 CREATE TABLE IF NOT EXISTS etiquetas (
                     id_etiqueta VARCHAR(50) PRIMARY KEY,
                     area VARCHAR(100) NOT NULL,
-                    data_hora TIMESTAMP NOT NULL
+                    data_hora TIMESTAMP NOT NULL,
+                    data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
             """)
             connection.commit()
@@ -58,14 +59,17 @@ def adicionar_etiqueta(id_etiqueta, area_inicial):
         try:
             cursor = connection.cursor()
             data_hora_atual = horario_sao_paulo()
-            cursor.execute("INSERT INTO etiquetas (id_etiqueta, area, data_hora) VALUES (%s, %s, %s)", 
-                           (id_etiqueta, area_inicial, data_hora_atual))
+            cursor.execute("""
+                INSERT INTO etiquetas (id_etiqueta, area, data_hora, data_criacao) 
+                VALUES (%s, %s, %s, %s)
+            """, (id_etiqueta, area_inicial, data_hora_atual, data_hora_atual))
             connection.commit()
         except OperationalError as e:
             raise ValueError(f"Erro ao adicionar etiqueta: {e}")
         finally:
             cursor.close()
             connection.close()
+
 
 # Função para atualizar a localização de uma etiqueta
 def atualizar_localizacao(id_etiqueta, nova_area):
@@ -108,7 +112,7 @@ def gerar_relatorio_excel(data_inicio, data_fim):
         try:
             cursor = connection.cursor()
             cursor.execute("""
-                SELECT id_etiqueta, area, data_hora 
+                SELECT id_etiqueta, area, data_hora, data_criacao
                 FROM etiquetas 
                 WHERE data_hora BETWEEN %s AND %s
                 ORDER BY data_hora
@@ -121,11 +125,11 @@ def gerar_relatorio_excel(data_inicio, data_fim):
             ws.title = "Relatório de Etiquetas"
             
             # Adicionar cabeçalhos
-            ws.append(["ID da Etiqueta", "Área", "Data e Hora"])
+            ws.append(["ID da Etiqueta", "Área", "Data e Hora da Última Atualização", "Data e Hora de Criação"])
             
             # Adicionar dados
             for row in results:
-                ws.append([row['id_etiqueta'], row['area'], row['data_hora']])
+                ws.append([row['id_etiqueta'], row['area'], row['data_hora'], row['data_criacao']])
             
             # Salvar o arquivo em um buffer de memória
             excel_file = BytesIO()

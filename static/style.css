@@ -44,7 +44,7 @@ form {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    align-items: flex-end;
+    align-items: flex-start;
 }
 
 input, select {
@@ -98,6 +98,6 @@ button:hover {
     }
 
     input, select, button {
-        width: 100%;
+        width: 90%;
     }
 }

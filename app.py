@@ -21,7 +21,7 @@ def adicionar():
     area_inicial = request.form['area_inicial']
     try:
         adicionar_etiqueta(id_etiqueta, area_inicial)
-        flash(f'Etiqueta {id_etiqueta} adicionada na área {area_inicial}.')
+        flash(f'Etiqueta {id_etiqueta} adicionada na área {area_inicial}. Data de criação registrada.')
     except ValueError as e:
         flash(str(e))
     return redirect(url_for('index'))
