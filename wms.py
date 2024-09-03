@@ -2,6 +2,8 @@ import pymysql
 from pymysql import OperationalError
 from datetime import datetime
 import pytz
+from openpyxl import Workbook
+from io import BytesIO
 
 # Configurações da conexão com o banco de dados
 def conectar_banco():
@@ -10,7 +12,7 @@ def conectar_banco():
             charset="utf8mb4",
             connect_timeout=10,
             cursorclass=pymysql.cursors.DictCursor,
-            db="defaultdb",  # Substitua pelo nome do seu banco de dados
+            db="defaultdb",
             host="mysql-loc-project-166.l.aivencloud.com",
             password="AVNS_CS4hASi4h2FxmmE0Vsy",
             read_timeout=10,
@@ -96,6 +98,43 @@ def consultar_localizacao(id_etiqueta):
                 raise ValueError(f"Etiqueta {id_etiqueta} não encontrada.")
         except OperationalError as e:
             raise ValueError(f"Erro ao consultar localização: {e}")
+        finally:
+            cursor.close()
+            connection.close()
+    
+def gerar_relatorio_excel(data_inicio, data_fim):
+    connection = conectar_banco()
+    if connection:
+        try:
+            cursor = connection.cursor()
+            cursor.execute("""
+                SELECT id_etiqueta, area, data_hora 
+                FROM etiquetas 
+                WHERE data_hora BETWEEN %s AND %s
+                ORDER BY data_hora
+            """, (data_inicio, data_fim))
+            
+            results = cursor.fetchall()
+            
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Relatório de Etiquetas"
+            
+            # Adicionar cabeçalhos
+            ws.append(["ID da Etiqueta", "Área", "Data e Hora"])
+            
+            # Adicionar dados
+            for row in results:
+                ws.append([row['id_etiqueta'], row['area'], row['data_hora']])
+            
+            # Salvar o arquivo em um buffer de memória
+            excel_file = BytesIO()
+            wb.save(excel_file)
+            excel_file.seek(0)
+            
+            return excel_file
+        except OperationalError as e:
+            raise ValueError(f"Erro ao gerar relatório: {e}")
         finally:
             cursor.close()
             connection.close()

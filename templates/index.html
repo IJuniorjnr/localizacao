@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WMS - Gerenciamento de Etiquetas</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 </head>
 <body>
     <h1>WMS - Gerenciamento de Etiquetas</h1>
@@ -42,6 +45,16 @@
         <button type="submit">Buscar</button>
     </form>
 
+    <!--Forumário para gerar o relatório-->
+    <form action="{{ url_for('gerar_relatorio') }}" method="POST">
+        <h2>Gerar Relatório</h2>
+        <label for="data_inicio">Data de Início:</label>
+        <input type="text" id="data_inicio" name="data_inicio" required>
+        <label for="data_fim">Data de Fim:</label>
+        <input type="text" id="data_fim" name="data_fim" required>
+        <button type="submit">Gerar Relatório</button>
+    </form>
+
     <!-- Exibir resultado da busca -->
     {% if etiqueta %}
     <h2>Resultado da Busca</h2>
@@ -60,5 +73,25 @@
             </ul>
         {% endif %}
     {% endwith %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr("#data_inicio", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                defaultDate: "{{ data_inicial }}",
+                locale: "pt",
+                time_24hr: true
+            });
+
+            flatpickr("#data_fim", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                defaultDate: "{{ data_final }}",
+                locale: "pt",
+                time_24hr: true
+            });
+        });
+    </script>
 </body>
 </html>
